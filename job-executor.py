@@ -8,10 +8,11 @@ import logging.handlers
 import os
 import datetime
 
-hive_cmd = '''hive -f %s -hivevar DATA_DT="%s" -hivevar YST_DATA_DT="%s" -hivevar DATA_DT_ISO="%s" -hivevar YST_DATA_DT_ISO="%s" -hivevar DATA_YEAR="%s" -hivevar DATA_DM="%s" -hivevar DATA_DM_ISO="%s" -hivevar DATA_DT_8="%s" 1>logs/%s.log 2>&1'''
+hive_cmd = '''hive -f %s -hivevar DATA_DT="%s" -hivevar YST_DATA_DT="%s" -hivevar DATA_DT_ISO="%s" -hivevar YST_DATA_DT_ISO="%s" -hivevar DATA_YEAR="%s" -hivevar DATA_DM="%s" -hivevar DATA_DM_ISO="%s" -hivevar DATA_DT_8="%s" 1>logs/%s 2>&1'''
 hql_directory = "job-scripts"
 
 logger = None
+
 
 def run_command_func(command):
     logger.info("begin to run command[%s]" % command)
@@ -28,31 +29,47 @@ def run_command_func(command):
         else:
             break
 
+
 def excute_func(tablename):
     try:
         run_command_func(hive_cmd % \
-                         (get_hql(tablename), get_data_dt_iso(tablename), get_prev_data_dt_iso(tablename), \
-                          get_data_dt_iso(tablename), get_prev_data_dt_iso(tablename), get_year(tablename), \
-                          get_data_dm_iso(tablename), get_data_dm_iso(tablename), get_data_dt(tablename), tablename.lower()
+                         (get_hql(tablename), get_data_dt_iso(tablename), get_prev_data_dt_iso(tablename),
+                          get_data_dt_iso(tablename), get_prev_data_dt_iso(tablename), get_year(tablename),
+                          get_data_dm_iso(tablename), get_data_dm_iso(tablename), get_data_dt(tablename),
+                          get_logname(tablename))
                          )
-                        )
     except Exception as e:
         warning_message = traceback.format_exc()
         logger.error(warning_message)
         exit(-1)
 
+
 def get_hql(tablename):
     try:
-        #DWP_JYJX_T_SCHOOL_INFO_20170208.dir
+        # DWP_JYJX_T_SCHOOL_INFO_20170208.dir
         tmp_ls = tablename.split(".")[0].split("_")
         hql_file_name = "_".join(x.capitalize() for x in tmp_ls[1:-1])
-        #load_date = tmp_ls[-1]
+        # load_date = tmp_ls[-1]
 
         return hql_directory + '/pdata.' + hql_file_name + '.sql'
     except:
         warning_message = traceback.format_exc()
         logger.error(warning_message)
         sys.exit(-1)
+
+def get_logname(tablename):
+    try:
+        # DWP_JYJX_T_SCHOOL_INFO_20170208.dir
+        tmp_ls = tablename.split(".")[0].split("_")
+        log_file_name = "_".join(x.capitalize() for x in tmp_ls[1:-1])
+        # load_date = tmp_ls[-1]
+
+        return log_file_name + '_' + get_data_dt(tablename) + '.log'
+    except:
+        warning_message = traceback.format_exc()
+        logger.error(warning_message)
+        sys.exit(-1)
+
 
 def get_data_dt(tablename):
     # tmp_ls = tablename.split(".")[0].split("_")
@@ -65,20 +82,24 @@ def get_data_dt(tablename):
     else:
         return datetime.datetime.now().strftime('%Y%m%d')
 
+
 def get_prev_data_dt(tablename):
     data_dt = get_data_dt(tablename)
     target_datetime = datetime.datetime.strptime(data_dt, "%Y%m%d")
     return (target_datetime - datetime.timedelta(days=1)).strftime("%Y%m%d")
+
 
 def get_data_dt_iso(tablename):
     data_dt = get_data_dt(tablename)
     target_datetime = datetime.datetime.strptime(data_dt, "%Y%m%d")
     return target_datetime.strftime("%Y-%m-%d")
 
+
 def get_prev_data_dt_iso(tablename):
     data_dt = get_data_dt(tablename)
     target_datetime = datetime.datetime.strptime(data_dt, "%Y%m%d")
     return (target_datetime - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+
 
 def get_year(tablename):
     tmp_ls = tablename.split(".")[0].split("_")
@@ -89,10 +110,12 @@ def get_data_dm(tablename):
     tmp_ls = tablename.split(".")[0].split("_")
     return tmp_ls[-1][:6]
 
+
 def get_data_dm_iso(tablename):
     data_dt = get_data_dt(tablename)
     target_datetime = datetime.datetime.strptime(data_dt, "%Y%m%d")
     return target_datetime.strftime("%Y-%m")
+
 
 def main():
     if len(sys.argv) == 2:
@@ -101,6 +124,7 @@ def main():
     else:
         logger.error("parameter error!")
         sys.exit(-1)
+
 
 if __name__ == '__main__':
     log_file = 'logs/job-executor.log'
