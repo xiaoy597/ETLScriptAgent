@@ -8,7 +8,7 @@ import logging.handlers
 import os
 import datetime
 
-hive_cmd = '''hive -f %s -hivevar DATA_DT="%s" -hivevar YST_DATA_DT="%s" -hivevar DATA_DT_ISO="%s" -hivevar YST_DATA_DT_ISO="%s" -hivevar DATA_YEAR="%s" -hivevar DATA_DM="%s" -hivevar DATA_DM_ISO="%s" -hivevar DATA_DT_8="%s" 1>logs/%s 2>&1'''
+hive_cmd = '''hive -f %s -hivevar DATA_DT="%s" -hivevar LAST_DATA_DT="%s" -hivevar DATA_DT_ISO="%s" -hivevar LAST_DATA_DT_ISO="%s" -hivevar DATA_YEAR="%s" -hivevar DATA_DM="%s" -hivevar DATA_DM_ISO="%s" -hivevar DATA_DT_8="%s" 1>logs/%s 2>&1'''
 hql_directory = "job-scripts"
 
 logger = None
